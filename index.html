@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bento Marquee Creator</title>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Bento <span>Marquee</span> Creator</h1>
+      <p class="subtitle">Create stunning bento-style marquee animations from your screenshots</p>
+    </header>
+
+    <div class="steps">
+      <div class="step-indicator">
+        <button class="step-dot active" data-step="1"><span>1</span> Upload</button>
+        <button class="step-dot" data-step="2"><span>2</span> Preview</button>
+        <button class="step-dot" data-step="3"><span>3</span> Export</button>
+      </div>
+    </div>
+
+    <!-- Step 1: Upload -->
+    <section id="step-1" class="step-panel active">
+      <h2>Upload</h2>
+      <p class="step-desc">Choose a template and upload your screenshots</p>
+      <div class="template-grid" id="template-grid"></div>
+
+      <div class="compression-info" id="compression-info" hidden>
+        <span id="original-size"></span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg>
+        <span id="compressed-size"></span>
+        <span class="savings" id="savings"></span>
+      </div>
+
+      <div class="row-config-section">
+        <div class="row-config-header">
+          <div class="row-config-title">
+            <span id="row-config-label">Rows</span>
+            <span class="row-count-badge" id="row-count-badge">3</span>
+          </div>
+          <div class="row-count-stepper">
+            <button class="stepper-btn" id="row-count-dec">−</button>
+            <span id="row-count-val">3</span>
+            <button class="stepper-btn" id="row-count-inc">+</button>
+          </div>
+        </div>
+        <div id="upload-row-types"></div>
+      </div>
+
+      <div class="step-actions">
+        <button class="btn btn-primary" id="btn-to-preview" disabled>Next: Preview</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Preview & Configure -->
+    <section id="step-2" class="step-panel">
+      <h2>Preview & Configure</h2>
+      <div class="preview-layout">
+        <div class="preview-container">
+          <canvas id="preview-canvas"></canvas>
+          <div class="preview-controls">
+            <button class="btn btn-icon" id="btn-play-pause" title="Play/Pause">
+              <svg id="icon-play" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+              <svg id="icon-pause" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" hidden><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="config-tabs-container">
+          <div class="config-tabs-header" id="config-tabs-header">
+            <!-- Tabs will be injected here via JS -->
+          </div>
+          
+          <div class="config-tabs-content">
+            <div id="tab-general" class="config-tab-pane active">
+              <div class="config-section">
+                <div class="config-group">
+                  <label>Canvas Size</label>
+                  <select id="cfg-size">
+                    <option value="1920x1080">1920 x 1080 (16:9)</option>
+                    <option value="1080x1080">1080 x 1080 (1:1)</option>
+                    <option value="1080x1920">1080 x 1920 (9:16)</option>
+                    <option value="1280x720">1280 x 720 (HD)</option>
+                    <option value="3840x2160">3840 x 2160 (4K)</option>
+                  </select>
+                </div>
+
+                <div class="config-group">
+                  <label>Background Color</label>
+                  <div class="color-input-row">
+                    <input type="color" id="cfg-bg-color" value="#0a0a0a">
+                    <input type="text" id="cfg-bg-color-text" value="#0a0a0a" maxlength="7">
+                  </div>
+                </div>
+
+                <div class="config-group">
+                  <label>Margins</label>
+                  <input type="range" id="cfg-margin" min="0" max="100" value="0" step="2">
+                  <span class="range-val" id="cfg-margin-val">0px</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Degrees</label>
+                  <input type="range" id="cfg-perspective" min="-90" max="90" value="0">
+                  <span class="range-val" id="cfg-perspective-val">0°</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Screenshot Gap</label>
+                  <input type="range" id="cfg-gap" min="4" max="40" value="16">
+                  <span class="range-val" id="cfg-gap-val">16px</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Screenshot Border Radius</label>
+                  <input type="range" id="cfg-radius" min="0" max="40" value="12">
+                  <span class="range-val" id="cfg-radius-val">12px</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Screenshot Border</label>
+                  <div class="border-config">
+                    <input type="range" id="cfg-border-width" min="0" max="8" value="0">
+                    <span class="range-val" id="cfg-border-width-val">0px</span>
+                    <div class="color-input-row">
+                      <input type="color" id="cfg-border-color" value="#333333">
+                      <input type="text" id="cfg-border-color-text" value="#333333" maxlength="7">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="tab-row" class="config-tab-pane">
+              <div class="config-section" id="row-settings-section">
+                <div class="config-group">
+                  <label>Marquee Direction</label>
+                  <select id="cfg-direction">
+                    <option value="left">Left</option>
+                    <option value="right">Right</option>
+                    <option value="up">Up</option>
+                    <option value="down">Down</option>
+                  </select>
+                </div>
+
+                <div class="config-group">
+                  <label>Marquee Speed</label>
+                  <input type="range" id="cfg-speed" min="0.2" max="3" step="0.1" value="1">
+                  <span class="range-val" id="cfg-speed-val">1x</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Screenshots per Row</label>
+                  <input type="range" id="cfg-visible" min="2" max="8" step="1" value="4">
+                  <span class="range-val" id="cfg-visible-val">4</span>
+                </div>
+
+                <div class="config-group">
+                  <label>Image Size (%)</label>
+                  <input type="range" id="cfg-image-scale" min="20" max="300" step="5" value="100">
+                  <span class="range-val" id="cfg-image-scale-val">100%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-secondary" id="btn-back-to-upload">Back</button>
+        <button class="btn btn-primary" id="btn-to-export">Next: Export</button>
+
+      </div>
+    </section>
+
+    <!-- Step 3: Export -->
+    <section id="step-3" class="step-panel">
+      <h2>Export</h2>
+      <div class="export-layout">
+        <div class="export-options">
+          <div class="config-group">
+            <label>Format</label>
+            <div class="format-toggle">
+              <button class="fmt-btn active" data-format="gif">GIF</button>
+              <button class="fmt-btn" data-format="video">Video (WebM)</button>
+            </div>
+          </div>
+
+          <div class="config-group">
+            <label>Quality</label>
+            <div class="quality-toggle">
+              <button class="qual-btn" data-quality="low">Low</button>
+              <button class="qual-btn active" data-quality="mid">Mid</button>
+              <button class="qual-btn" data-quality="high">High</button>
+            </div>
+            <div class="quality-desc" id="quality-desc">Balanced quality and file size</div>
+          </div>
+
+          <div class="config-group">
+            <label>Loop Duration</label>
+            <div class="duration-auto">
+              <div class="duration-computed">
+                <span class="duration-label">1 loop =</span>
+                <span class="duration-value" id="seamless-duration-val">—</span>
+              </div>
+              <div class="loop-multiplier">
+                <span class="duration-label">Repeats</span>
+                <div class="mult-btns">
+                  <button class="mult-btn active" data-mult="1">1×</button>
+                  <button class="mult-btn" data-mult="2">2×</button>
+                  <button class="mult-btn" data-mult="3">3×</button>
+                  <button class="mult-btn" data-mult="4">4×</button>
+                </div>
+              </div>
+              <div class="duration-total">
+                <span class="duration-label">Total duration</span>
+                <span class="duration-value" id="total-duration-val">—</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="export-estimate" id="export-estimate">
+            <div class="estimate-row">
+              <span>Estimated file size:</span>
+              <span id="est-size">~2.4 MB</span>
+            </div>
+            <div class="estimate-row">
+              <span>Resolution:</span>
+              <span id="est-resolution">1920 x 1080</span>
+            </div>
+            <div class="estimate-row">
+              <span>Frames:</span>
+              <span id="est-frames">—</span>
+            </div>
+          </div>
+
+          <button class="btn btn-export" id="btn-export">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export
+          </button>
+
+          <div class="export-progress" id="export-progress" hidden>
+            <div class="progress-bar">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <span class="progress-text" id="progress-text">Rendering frames...</span>
+          </div>
+
+          <div class="export-result" id="export-result" hidden>
+            <div class="result-info">
+              <span id="result-filename"></span>
+              <span id="result-size"></span>
+            </div>
+            <button class="btn btn-primary" id="btn-download">Download</button>
+          </div>
+        </div>
+        <div class="export-preview-wrap">
+          <canvas id="export-preview-canvas"></canvas>
+        </div>
+      </div>
+      <div class="step-actions">
+        <button class="btn btn-secondary" id="btn-back-to-preview">Back</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/gif.js@0.2.0/dist/gif.js"></script>
+  <script src="js/templates.js"></script>
+  <script src="js/compressor.js"></script>
+  <script src="js/renderer.js"></script>
+  <script src="js/exporter.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
